@@ -113,22 +113,23 @@ psql -U postgres -h localhost -d gozero_template -f deployments/init.sql
 
 ### 4. Configure Services
 
-#### Configuration Files
+#### Environment Variables
 
-The configuration files (`api/etc/api.yaml` and `service/user/etc/user.yaml`) support environment variable substitution using `${VARIABLE:-default}` syntax.
+This project uses `.env` files for configuration. All configuration is loaded from environment variables.
 
-**If you're using `.env` file:**
-- Environment variables from `.env` will be automatically loaded
-- They will override default values in YAML config files
-- No need to edit YAML files directly
+**Setup:**
+1. Copy the example environment file:
+```bash
+cp .env.example .env
+```
 
-**If you're not using `.env` file:**
-- Edit `api/etc/api.yaml` and `service/user/etc/user.yaml` directly
-- Or set environment variables before running the services
+2. Edit `.env` with your actual values (database, Redis, RabbitMQ, Zitadel credentials)
 
-Example: The config file uses `${DATABASE_HOST:-localhost}`, which means:
-- Use `DATABASE_HOST` from environment if set
-- Otherwise, use `localhost` as default
+3. Services will automatically load from `.env` file when running locally
+
+**For Docker:**
+- Environment variables are set in `docker-compose.yml`
+- You can also use `.env` file which will be loaded automatically
 
 ## Code Generation
 
@@ -179,7 +180,7 @@ docker-compose up -d postgres redis rabbitmq
 
 ```bash
 cd service/user
-go run main.go -f etc/user.yaml
+go run main.go
 ```
 
 The service will start on `localhost:9000`.
@@ -190,7 +191,7 @@ In another terminal:
 
 ```bash
 cd api
-go run main.go -f etc/api.yaml
+go run main.go
 ```
 
 The API Gateway will start on `localhost:8888`.

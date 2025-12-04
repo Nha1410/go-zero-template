@@ -16,7 +16,6 @@ type userRepo struct {
 	db *sql.DB
 }
 
-// NewUserRepo creates a new user repository
 func NewUserRepo(db *sql.DB) repository.UserRepository {
 	return &userRepo{
 		db: db,
@@ -92,7 +91,6 @@ func (r *userRepo) GetByEmail(ctx context.Context, email string) (*entity.User, 
 }
 
 func (r *userRepo) List(ctx context.Context, page, pageSize int64) ([]*entity.User, int64, error) {
-	// Get total count
 	var total int64
 	countQuery := `SELECT COUNT(*) FROM users`
 	err := r.db.QueryRowContext(ctx, countQuery).Scan(&total)
@@ -101,7 +99,6 @@ func (r *userRepo) List(ctx context.Context, page, pageSize int64) ([]*entity.Us
 		return nil, 0, err
 	}
 
-	// Get users with pagination
 	offset := (page - 1) * pageSize
 	query := `
 		SELECT id, email, name, created_at, updated_at

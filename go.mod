@@ -7,6 +7,7 @@ toolchain go1.24.6
 require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/streadway/amqp v1.1.0
 	github.com/zeromicro/go-zero v1.9.3

@@ -6,23 +6,23 @@ import (
 )
 
 type Config struct {
-	zrpc.RpcServerConf `yaml:",inline"`
-	Database           struct {
+	zrpc.RpcServerConf
+	Database struct {
 		Postgres database.PostgresConfig
-		Type     string `yaml:",default=postgres"`
+		Type     string
 	}
 	AppRedis struct {
 		Host     string
 		Port     int
 		Password string
-		DB       int `yaml:",default=0"`
-		PoolSize int `yaml:",default=10"`
-	} `yaml:"AppRedis" json:"AppRedis"`
+		DB       int
+		PoolSize int
+	}
 	RabbitMQ struct {
 		Host     string
 		Port     int
 		User     string
 		Password string
-		VHost    string `yaml:",default=/"`
+		VHost    string
 	}
 }

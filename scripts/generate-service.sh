@@ -7,5 +7,5 @@ set -e
 
 SERVICE_NAME=${1:-user}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/generate.sh" service "$SERVICE_NAME"
+"$SCRIPT_DIR/generate.sh" rpc "$SERVICE_NAME"
 

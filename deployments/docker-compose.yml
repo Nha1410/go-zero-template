@@ -1,4 +1,6 @@
-version: '3.8'
+# Docker Compose configuration for go-zero template
+# Services will load configuration from environment variables
+# You can use .env file in the root directory or set env vars directly
 
 services:
   # PostgreSQL Database
@@ -74,18 +76,45 @@ services:
         condition: service_healthy
     ports:
       - "9000:9000"
-    volumes:
-      - ../service/user/etc:/root/etc
     networks:
       - go-zero-network
+    env_file:
+      - ../.env
     environment:
+      # Service Configuration
+      - USER_SERVICE_NAME=user-service
+      - USER_SERVICE_LISTEN_ON=0.0.0.0:9000
+      - USER_SERVICE_MODE=dev
+      # Database
       - DATABASE_TYPE=postgres
       - DATABASE_HOST=postgres
       - DATABASE_PORT=5432
+      - DATABASE_USER=${DATABASE_USER:-postgres}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-postgres}
+      - DATABASE_NAME=${DATABASE_NAME:-gozero_template}
+      - DATABASE_SSLMODE=disable
+      # Redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_DB=0
+      - REDIS_POOL_SIZE=10
+      # RabbitMQ
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - RABBITMQ_VHOST=/
+      # Logging
+      - LOG_MODE=file
+      - LOG_PATH=logs
+      - LOG_LEVEL=info
+      - LOG_COMPRESS=true
+      - LOG_KEEP_DAYS=7
+      # Prometheus
+      - PROMETHEUS_HOST=0.0.0.0
+      - PROMETHEUS_PORT=9092
+      - PROMETHEUS_PATH=/metrics
 
   # API Gateway
   api-gateway:
@@ -102,19 +131,55 @@ services:
         condition: service_healthy
     ports:
       - "8888:8888"
-    volumes:
-      - ../api/etc:/root/etc
     networks:
       - go-zero-network
+    env_file:
+      - ../.env
     environment:
+      # Service Configuration
+      - API_NAME=api-gateway
+      - API_HOST=0.0.0.0
+      - API_PORT=8888
+      # Database
       - DATABASE_TYPE=postgres
       - DATABASE_HOST=postgres
       - DATABASE_PORT=5432
+      - DATABASE_USER=${DATABASE_USER:-postgres}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-postgres}
+      - DATABASE_NAME=${DATABASE_NAME:-gozero_template}
+      - DATABASE_SSLMODE=disable
+      # Redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_DB=0
+      - REDIS_POOL_SIZE=10
+      # RabbitMQ
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - RABBITMQ_VHOST=/
+      # User RPC
       - USER_RPC_HOST=user-service:9000
+      - USER_RPC_KEY=user.rpc
+      - USER_RPC_TIMEOUT=5000
+      - USER_RPC_NON_BLOCK=true
+      # Logging
+      - LOG_MODE=file
+      - LOG_PATH=logs
+      - LOG_LEVEL=info
+      - LOG_COMPRESS=true
+      - LOG_KEEP_DAYS=7
+      # Prometheus
+      - PROMETHEUS_HOST=0.0.0.0
+      - PROMETHEUS_PORT=9091
+      - PROMETHEUS_PATH=/metrics
+      # Zitadel (optional, can be set in .env)
+      - ZITADEL_ISSUER=${ZITADEL_ISSUER:-}
+      - ZITADEL_CLIENT_ID=${ZITADEL_CLIENT_ID:-}
+      - ZITADEL_CLIENT_SECRET=${ZITADEL_CLIENT_SECRET:-}
+      - ZITADEL_SCOPES=${ZITADEL_SCOPES:-openid,profile,email}
 
 networks:
   go-zero-network:

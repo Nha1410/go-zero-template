@@ -25,10 +25,7 @@ WORKDIR /root/
 # Copy the binary from builder
 COPY --from=builder /app/bin/api ./api
 
-# Copy config file
-COPY --from=builder /app/api/etc ./etc
-
 EXPOSE 8888
 
-CMD ["./api", "-f", "etc/api.yaml"]
+CMD ["./api"]
 

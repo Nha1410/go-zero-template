@@ -30,7 +30,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
-	// Initialize Redis
 	redisClient, err := cache.NewRedisClient(cache.RedisConfig{
 		Host:     c.AppRedis.Host,
 		Port:     c.AppRedis.Port,
@@ -43,7 +42,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
-	// Initialize RabbitMQ
 	rabbitmqClient, err := queue.NewRabbitMQClient(queue.RabbitMQConfig{
 		Host:     c.RabbitMQ.Host,
 		Port:     c.RabbitMQ.Port,
@@ -56,10 +54,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepo(db)
-
-	// Initialize use cases
 	userUsecase := usecase.NewUserUsecase(userRepo)
 
 	return &ServiceContext{

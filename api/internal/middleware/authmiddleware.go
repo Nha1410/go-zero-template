@@ -23,14 +23,12 @@ func NewAuthMiddleware(svcCtx *svc.ServiceContext) *AuthMiddleware {
 
 func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Extract token from request
 		token := auth.ExtractTokenFromRequest(r)
 		if token == "" {
 			httpx.ErrorCtx(r.Context(), w, errors.ErrUnauthorized)
 			return
 		}
 
-		// Validate token with Zitadel
 		userInfo, err := m.svcCtx.Zitadel.ValidateToken(r.Context(), token)
 		if err != nil {
 			logx.Errorf("Token validation failed: %v", err)
@@ -38,12 +36,10 @@ func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// Add user info to context
 		ctx := context.WithValue(r.Context(), "user_id", userInfo.Sub)
 		ctx = context.WithValue(ctx, "user_email", userInfo.Email)
 		ctx = context.WithValue(ctx, "user_info", userInfo)
 
-		// Continue with the request
 		next(w, r.WithContext(ctx))
 	}
 }

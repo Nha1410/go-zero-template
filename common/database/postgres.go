@@ -9,7 +9,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-// PostgresConfig holds PostgreSQL configuration
 type PostgresConfig struct {
 	Host            string
 	Port            int
@@ -23,7 +22,6 @@ type PostgresConfig struct {
 	ConnMaxIdleTime time.Duration
 }
 
-// NewPostgresConnection creates a new PostgreSQL connection
 func NewPostgresConnection(config PostgresConfig) (*sql.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
@@ -40,7 +38,6 @@ func NewPostgresConnection(config PostgresConfig) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to open postgres connection: %w", err)
 	}
 
-	// Set connection pool settings
 	if config.MaxOpenConns > 0 {
 		db.SetMaxOpenConns(config.MaxOpenConns)
 	}
@@ -54,7 +51,6 @@ func NewPostgresConnection(config PostgresConfig) (*sql.DB, error) {
 		db.SetConnMaxIdleTime(config.ConnMaxIdleTime)
 	}
 
-	// Test connection
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping postgres database: %w", err)
 	}
@@ -63,7 +59,6 @@ func NewPostgresConnection(config PostgresConfig) (*sql.DB, error) {
 	return db, nil
 }
 
-// ClosePostgresConnection closes the PostgreSQL connection
 func ClosePostgresConnection(db *sql.DB) error {
 	if db != nil {
 		return db.Close()

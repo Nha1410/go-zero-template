@@ -26,7 +26,6 @@ go-zero-template/
 │   │   ├── svc/            # Service context
 │   │   └── types/          # Generated types
 │   ├── api/                # API definition files (.api)
-│   ├── etc/                # Configuration files
 │   └── main.go
 ├── service/                # Microservices
 │   └── user/               # User service example
@@ -38,7 +37,6 @@ go-zero-template/
 │       │   ├── logic/      # Business logic
 │       │   └── svc/        # Service context
 │       ├── user.proto      # gRPC proto definition
-│       ├── etc/            # Configuration
 │       └── main.go
 ├── common/                 # Shared code
 │   ├── auth/               # Authentication utilities
@@ -84,13 +82,13 @@ go mod download
 
 ### 3. Configure Environment
 
-#### Option A: Using Environment Variables (Recommended)
+**This project uses `.env` files for configuration. YAML files are no longer needed.**
 
 Copy the example environment file and update with your values:
 
 ```bash
 # For local development (outside Docker)
-cp env.example .env
+cp .env.example .env
 # Edit .env with your actual values
 
 # For Docker Compose
@@ -99,27 +97,27 @@ cp env.example .env
 # Edit .env with your actual values
 ```
 
-#### Option B: Direct Configuration Files
+Update the configuration in `.env` with your database, Redis, RabbitMQ, and Zitadel credentials.
 
-Copy and edit configuration files directly:
+**Note**: All configuration is loaded from environment variables. See `.env.example` for all available configuration options.
 
-```bash
-cp api/etc/api.yaml api/etc/api.yaml.local
-cp service/user/etc/user.yaml service/user/etc/user.yaml.local
-```
-
-Update the configuration with your database, Redis, RabbitMQ, and Zitadel credentials.
-
-**Note**: Configuration files support environment variable substitution using `${VARIABLE:-default}` syntax. Environment variables take precedence over default values in config files.
-
-### 4. Start Infrastructure with Docker Compose
+### 4. Start All Services with Docker Compose (Recommended)
 
 ```bash
 cd deployments
-docker-compose up -d postgres redis rabbitmq
+docker-compose up -d
 ```
 
-### 5. Generate Code
+This will start all services including:
+- PostgreSQL database
+- Redis cache
+- RabbitMQ message queue
+- User Service (gRPC)
+- API Gateway
+
+See [deployments/README.md](deployments/README.md) for detailed Docker deployment guide.
+
+### 5. Generate Code (if needed)
 
 ```bash
 # Generate API Gateway code
@@ -129,16 +127,22 @@ docker-compose up -d postgres redis rabbitmq
 ./scripts/generate-service.sh user
 ```
 
-### 6. Run Services
+### 6. Run Services Locally (Alternative to Docker)
+
+If you prefer to run services locally instead of Docker:
 
 ```bash
+# Make sure you have .env file in root directory
+cp .env.example .env
+# Edit .env with your values
+
 # Run User service
 cd service/user
-go run main.go -f etc/user.yaml
+go run main.go
 
 # Run API Gateway (in another terminal)
 cd api
-go run main.go -f etc/api.yaml
+go run main.go
 ```
 
 ## Development
@@ -181,56 +185,28 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture docum
 
 ### Environment Variables
 
-The project supports environment variables for configuration. Two example files are provided:
-
-- **`env.example`** - For local development (root directory)
-- **`deployments/env.example`** - For Docker Compose (deployments directory)
+All configuration is done via environment variables. See `.env.example` for all available options.
 
 **Setup:**
 ```bash
 # For local development
-cp env.example .env
-# Edit .env with your values
-
-# For Docker Compose
-cd deployments
-cp env.example .env
+cp .env.example .env
 # Edit .env with your values
 ```
-
-### Configuration Files
-
-Configuration files use environment variable substitution with `${VARIABLE:-default}` syntax:
-- `api/etc/api.yaml` - API Gateway configuration
-- `service/user/etc/user.yaml` - User service configuration
-
-Environment variables take precedence over default values in config files.
 
 ## Docker
 
-### Build and Run with Docker Compose
+See [deployments/README.md](deployments/README.md) for detailed Docker deployment guide.
 
+**Quick Start:**
 ```bash
 cd deployments
-docker-compose up --build
+docker-compose up -d
 ```
-
-This will start:
-- PostgreSQL database
-- Redis cache
-- RabbitMQ message queue
-- User service (gRPC)
-- API Gateway (HTTP)
-
-### Individual Service Dockerfiles
-
-Each service has its own Dockerfile:
-- `api/Dockerfile` - API Gateway
-- `service/user/Dockerfile` - User service
 
 ## Authentication
 
-The template integrates with Zitadel for OAuth2 authentication. Configure your Zitadel instance in the configuration files.
+The template integrates with Zitadel for OAuth2 authentication. Configure your Zitadel instance in `.env` file.
 
 Protected endpoints require a Bearer token in the Authorization header:
 ```

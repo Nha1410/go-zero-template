@@ -27,10 +27,10 @@ build-user: ## Build User service
 build: build-api build-user ## Build all services
 
 run-api: ## Run API Gateway
-	cd api && go run main.go -f etc/api.yaml
+	cd api && go run main.go
 
 run-user: ## Run User service
-	cd service/user && go run main.go -f etc/user.yaml
+	cd service/user && go run main.go
 
 docker-up: ## Start Docker Compose services
 	cd deployments && docker-compose up -d

@@ -1,24 +1,19 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/Nha1410/go-zero-template/api/internal/config"
 	"github.com/Nha1410/go-zero-template/api/internal/handler"
 	"github.com/Nha1410/go-zero-template/api/internal/svc"
+	envConfig "github.com/Nha1410/go-zero-template/common/config"
 
-	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 )
 
-var configFile = flag.String("f", "etc/api.yaml", "the config file")
-
 func main() {
-	flag.Parse()
-
-	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	_ = envConfig.LoadEnv()
+	c := config.LoadFromEnv()
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

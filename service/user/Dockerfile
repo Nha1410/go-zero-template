@@ -25,10 +25,7 @@ WORKDIR /root/
 # Copy the binary from builder
 COPY --from=builder /app/bin/user ./user
 
-# Copy config file
-COPY --from=builder /app/service/user/etc ./etc
-
 EXPOSE 9000
 
-CMD ["./user", "-f", "etc/user.yaml"]
+CMD ["./user"]
 

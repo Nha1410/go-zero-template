@@ -12,7 +12,7 @@ type Config struct {
 	rest.RestConf
 	Database struct {
 		Postgres database.PostgresConfig
-		Type     string `yaml:",default=postgres"`
+		Type     string
 	}
 	Redis    redisCache.RedisConfig
 	RabbitMQ struct {
@@ -20,7 +20,7 @@ type Config struct {
 		Port     int
 		User     string
 		Password string
-		VHost    string `json:"vhost"`
+		VHost    string
 	}
 	Zitadel auth.ZitadelConfig
 	UserRpc zrpc.RpcClientConf

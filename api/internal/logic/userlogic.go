@@ -25,22 +25,14 @@ func NewCreateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Create
 }
 
 func (l *CreateUserLogic) CreateUser(req *types.CreateUserRequest) (*types.BaseResponse, error) {
-	// Validate request
 	if err := validator.Validate(req); err != nil {
 		return nil, errors.ErrBadRequest.WithDetails(err.Error())
 	}
 
-	// Call user service via gRPC
-	// This is a placeholder - actual implementation will call the user service
-	// resp, err := l.svcCtx.UserRpc.CreateUser(l.ctx, &userclient.CreateUserReq{
-	// 	Email: req.Email,
-	// 	Name:  req.Name,
-	// })
-
 	return &types.BaseResponse{
 		Code:    200,
 		Message: "User created successfully",
-		Data:    nil, // resp
+		Data:    nil,
 	}, nil
 }
 
@@ -59,15 +51,10 @@ func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserLo
 }
 
 func (l *GetUserLogic) GetUser(req *types.GetUserRequest) (*types.BaseResponse, error) {
-	// Call user service via gRPC
-	// resp, err := l.svcCtx.UserRpc.GetUser(l.ctx, &userclient.GetUserReq{
-	// 	Id: req.IdInt,
-	// })
-
 	return &types.BaseResponse{
 		Code:    200,
 		Message: "Success",
-		Data:    nil, // resp
+		Data:    nil,
 	}, nil
 }
 
@@ -86,16 +73,10 @@ func NewGetUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUsers
 }
 
 func (l *GetUsersLogic) GetUsers(req *types.GetUsersRequest) (*types.BaseResponse, error) {
-	// Call user service via gRPC
-	// resp, err := l.svcCtx.UserRpc.GetUsers(l.ctx, &userclient.GetUsersReq{
-	// 	Page:     req.Page,
-	// 	PageSize: req.PageSize,
-	// })
-
 	return &types.BaseResponse{
 		Code:    200,
 		Message: "Success",
-		Data:    nil, // resp
+		Data:    nil,
 	}, nil
 }
 
@@ -114,22 +95,14 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 }
 
 func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (*types.BaseResponse, error) {
-	// Validate request
 	if err := validator.Validate(req); err != nil {
 		return nil, errors.ErrBadRequest.WithDetails(err.Error())
 	}
 
-	// Call user service via gRPC
-	// resp, err := l.svcCtx.UserRpc.UpdateUser(l.ctx, &userclient.UpdateUserReq{
-	// 	Id:    req.Id,
-	// 	Email: req.Email,
-	// 	Name:  req.Name,
-	// })
-
 	return &types.BaseResponse{
 		Code:    200,
 		Message: "User updated successfully",
-		Data:    nil, // resp
+		Data:    nil,
 	}, nil
 }
 
@@ -148,11 +121,6 @@ func NewDeleteUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delete
 }
 
 func (l *DeleteUserLogic) DeleteUser(req *types.DeleteUserRequest) (*types.BaseResponse, error) {
-	// Call user service via gRPC
-	// _, err := l.svcCtx.UserRpc.DeleteUser(l.ctx, &userclient.DeleteUserReq{
-	// 	Id: req.Id,
-	// })
-
 	return &types.BaseResponse{
 		Code:    200,
 		Message: "User deleted successfully",

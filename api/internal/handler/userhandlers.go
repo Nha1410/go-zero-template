@@ -79,7 +79,6 @@ func UpdateUserHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// Get ID from path
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
@@ -105,7 +104,6 @@ func DeleteUserHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// Get ID from path
 		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
