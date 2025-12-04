@@ -13,14 +13,13 @@ Log:
   StackCooldownMillis: 100
 
 # Database configuration
-# Supported types: postgres, mysql
 Database:
-  Type: postgres  # or mysql
+  Type: postgres
 
   # PostgreSQL configuration
   Postgres:
     Host: ${DATABASE_HOST:-localhost}
-    Port: ${DATABASE_PORT:-5432}
+    Port: 5432  # Use default value directly, env var substitution may cause type mismatch
     User: ${DATABASE_USER:-postgres}
     Password: ${DATABASE_PASSWORD:-postgres}
     Database: ${DATABASE_NAME:-gozero_template}
@@ -30,31 +29,18 @@ Database:
     ConnMaxLifetime: 3600s
     ConnMaxIdleTime: 600s
 
-  # MySQL configuration
-  MySQL:
-    Host: ${MYSQL_HOST:-localhost}
-    Port: ${MYSQL_PORT:-3306}
-    User: ${MYSQL_USER:-mysql}
-    Password: ${MYSQL_PASSWORD:-mysql}
-    Database: ${MYSQL_DATABASE:-gozero_template}
-    Charset: utf8mb4
-    MaxOpenConns: 100
-    MaxIdleConns: 10
-    ConnMaxLifetime: 3600s
-    ConnMaxIdleTime: 600s
-
 # Redis cache configuration
 Redis:
   Host: ${REDIS_HOST:-localhost}
-  Port: ${REDIS_PORT:-6379}
+  Port: 6379  # Use default value directly, env var substitution may cause type mismatch
   Password: ${REDIS_PASSWORD:-}
-  DB: ${REDIS_DB:-0}
-  PoolSize: ${REDIS_POOL_SIZE:-10}
+  DB: 0  # Use default value directly, env var substitution may cause type mismatch
+  PoolSize: 10  # Use default value directly, env var substitution may cause type mismatch
 
 # RabbitMQ message queue configuration
 RabbitMQ:
   Host: ${RABBITMQ_HOST:-localhost}
-  Port: ${RABBITMQ_PORT:-5672}
+  Port: 5672  # Use default value directly, env var substitution may cause type mismatch
   User: ${RABBITMQ_USER:-guest}
   Password: ${RABBITMQ_PASSWORD:-guest}
   VHost: ${RABBITMQ_VHOST:-/}

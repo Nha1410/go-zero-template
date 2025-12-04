@@ -7,7 +7,7 @@ A production-ready template repository for building microservices APIs using [go
 - 🏗️ **Clean Architecture** - Well-organized layers (Domain, Use Case, Repository, Handler)
 - 🚀 **Microservices** - API Gateway pattern with independent gRPC services
 - 🔐 **OAuth2 Authentication** - Integration with Zitadel for AAA (Authentication, Authorization, Accounting)
-- 💾 **Multi-Database Support** - PostgreSQL (default) and MySQL support
+- 💾 **PostgreSQL Database** - PostgreSQL database support
 - ⚡ **Redis Caching** - Built-in Redis client for caching
 - 📨 **RabbitMQ** - Message queue support for async processing
 - 🐳 **Docker Support** - Docker Compose setup for local development
@@ -61,7 +61,7 @@ go-zero-template/
 - Go 1.21 or higher
 - Docker and Docker Compose
 - goctl CLI tool
-- PostgreSQL or MySQL
+- PostgreSQL
 - Redis
 - RabbitMQ
 - Zitadel instance (for OAuth2)
@@ -84,7 +84,24 @@ go mod download
 
 ### 3. Configure Environment
 
-Copy and edit configuration files:
+#### Option A: Using Environment Variables (Recommended)
+
+Copy the example environment file and update with your values:
+
+```bash
+# For local development (outside Docker)
+cp env.example .env
+# Edit .env with your actual values
+
+# For Docker Compose
+cd deployments
+cp env.example .env
+# Edit .env with your actual values
+```
+
+#### Option B: Direct Configuration Files
+
+Copy and edit configuration files directly:
 
 ```bash
 cp api/etc/api.yaml api/etc/api.yaml.local
@@ -92,6 +109,8 @@ cp service/user/etc/user.yaml service/user/etc/user.yaml.local
 ```
 
 Update the configuration with your database, Redis, RabbitMQ, and Zitadel credentials.
+
+**Note**: Configuration files support environment variable substitution using `${VARIABLE:-default}` syntax. Environment variables take precedence over default values in config files.
 
 ### 4. Start Infrastructure with Docker Compose
 
@@ -143,8 +162,8 @@ The template includes helper scripts for code generation:
 # Generate gRPC service from .proto file
 ./scripts/generate-service.sh <service-name>
 
-# Generate models from database
-./scripts/generate.sh model postgres 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'
+# Generate models from PostgreSQL database
+./scripts/generate.sh model 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'
 ```
 
 ## Architecture
@@ -160,9 +179,32 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture docum
 
 ## Configuration
 
-Configuration files use environment variables for sensitive data. See configuration files in:
+### Environment Variables
+
+The project supports environment variables for configuration. Two example files are provided:
+
+- **`env.example`** - For local development (root directory)
+- **`deployments/env.example`** - For Docker Compose (deployments directory)
+
+**Setup:**
+```bash
+# For local development
+cp env.example .env
+# Edit .env with your values
+
+# For Docker Compose
+cd deployments
+cp env.example .env
+# Edit .env with your values
+```
+
+### Configuration Files
+
+Configuration files use environment variable substitution with `${VARIABLE:-default}` syntax:
 - `api/etc/api.yaml` - API Gateway configuration
 - `service/user/etc/user.yaml` - User service configuration
+
+Environment variables take precedence over default values in config files.
 
 ## Docker
 
@@ -175,7 +217,6 @@ docker-compose up --build
 
 This will start:
 - PostgreSQL database
-- MySQL database (optional)
 - Redis cache
 - RabbitMQ message queue
 - User service (gRPC)

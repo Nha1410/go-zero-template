@@ -7,7 +7,6 @@ toolchain go1.24.6
 require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-sql-driver/mysql v1.9.0
 	github.com/lib/pq v1.10.9
 	github.com/streadway/amqp v1.1.0
 	github.com/zeromicro/go-zero v1.9.3
@@ -16,7 +15,6 @@ require (
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

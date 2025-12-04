@@ -9,7 +9,7 @@ Before you begin, ensure you have the following installed:
 - **Go 1.21+**: [Download Go](https://golang.org/dl/)
 - **Docker & Docker Compose**: [Install Docker](https://docs.docker.com/get-docker/)
 - **goctl CLI**: Install with `go install github.com/zeromicro/go-zero/tools/goctl@latest`
-- **PostgreSQL** (or MySQL): For database
+- **PostgreSQL**: For database
 - **Redis**: For caching
 - **RabbitMQ**: For message queue
 - **Zitadel**: OAuth2 provider (or use a test instance)
@@ -58,9 +58,45 @@ This will start:
 
 #### Option B: Local Installation
 
-Install and configure PostgreSQL/MySQL, Redis, and RabbitMQ locally.
+Install and configure PostgreSQL, Redis, and RabbitMQ locally.
 
-### 2. Initialize Database
+### 2. Configure Environment Variables
+
+#### For Local Development (without Docker)
+
+Copy the example environment file:
+
+```bash
+cp env.example .env
+```
+
+Edit `.env` with your actual values for database, Redis, RabbitMQ, and Zitadel.
+
+#### For Docker Compose
+
+Copy the example environment file in deployments directory:
+
+```bash
+cd deployments
+cp env.example .env
+```
+
+Edit `deployments/.env` with your actual values. Docker Compose will automatically load this file.
+
+### 3. Initialize Database
+
+#### Option A: Using Docker Compose
+
+The database will be automatically initialized when you start the containers:
+
+```bash
+cd deployments
+docker-compose up -d postgres
+```
+
+The initialization script (`init.sql`) will run automatically on first start.
+
+#### Option B: Manual Setup
 
 Connect to PostgreSQL and create the database:
 
@@ -75,41 +111,24 @@ Run the initialization script:
 psql -U postgres -h localhost -d gozero_template -f deployments/init.sql
 ```
 
-### 3. Configure Services
+### 4. Configure Services
 
-#### API Gateway Configuration
+#### Configuration Files
 
-Edit `api/etc/api.yaml`:
+The configuration files (`api/etc/api.yaml` and `service/user/etc/user.yaml`) support environment variable substitution using `${VARIABLE:-default}` syntax.
 
-```yaml
-Database:
-  Type: postgres
-  Postgres:
-    Host: localhost
-    Port: 5432
-    User: postgres
-    Password: postgres
-    Database: gozero_template
+**If you're using `.env` file:**
+- Environment variables from `.env` will be automatically loaded
+- They will override default values in YAML config files
+- No need to edit YAML files directly
 
-Redis:
-  Host: localhost
-  Port: 6379
+**If you're not using `.env` file:**
+- Edit `api/etc/api.yaml` and `service/user/etc/user.yaml` directly
+- Or set environment variables before running the services
 
-RabbitMQ:
-  Host: localhost
-  Port: 5672
-  User: guest
-  Password: guest
-
-Zitadel:
-  Issuer: https://your-zitadel-instance.com
-  ClientID: your-client-id
-  ClientSecret: your-client-secret
-```
-
-#### User Service Configuration
-
-Edit `service/user/etc/user.yaml` with similar database and service configurations.
+Example: The config file uses `${DATABASE_HOST:-localhost}`, which means:
+- Use `DATABASE_HOST` from environment if set
+- Otherwise, use `localhost` as default
 
 ## Code Generation
 
@@ -141,8 +160,8 @@ This will generate:
 # PostgreSQL
 ./scripts/generate.sh model postgres 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'
 
-# MySQL
-./scripts/generate.sh model mysql 'user:password@tcp(localhost:3306)/database'
+# PostgreSQL only
+./scripts/generate.sh model 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'
 ```
 
 ## Running the Services

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
+    image: postgres:latest
     container_name: go-zero-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - go-zero-network
@@ -22,30 +22,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # MySQL Database (optional)
-  mysql:
-    image: mysql:8.0
-    container_name: go-zero-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-gozero_template}
-      MYSQL_USER: ${MYSQL_USER:-mysql}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mysql}
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - go-zero-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Redis Cache
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     container_name: go-zero-redis
     ports:
       - "6379:6379"
@@ -60,9 +39,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # RabbitMQ Message Queue
+  # RabbitMQ Message Queue (using management tag for Management UI)
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:management
     container_name: go-zero-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
@@ -143,7 +122,6 @@ networks:
 
 volumes:
   postgres_data:
-  mysql_data:
   redis_data:
   rabbitmq_data:
 

@@ -157,8 +157,7 @@ This ensures:
 
 ### Supported Databases
 
-- **PostgreSQL** (default): Recommended for production
-- **MySQL**: Alternative option
+- **PostgreSQL**: Database used by the template
 
 ## Authentication & Authorization
 

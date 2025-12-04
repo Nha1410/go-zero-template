@@ -12,8 +12,7 @@ type Config struct {
 	rest.RestConf
 	Database struct {
 		Postgres database.PostgresConfig
-		MySQL    database.MySQLConfig
-		Type     string `json:"type"` // postgres or mysql
+		Type     string `yaml:",default=postgres"`
 	}
 	Redis    redisCache.RedisConfig
 	RabbitMQ struct {

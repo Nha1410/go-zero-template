@@ -23,14 +23,8 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	// Initialize database
-	var db *sql.DB
-	var err error
-	if c.Database.Type == "mysql" {
-		db, err = database.NewMySQLConnection(c.Database.MySQL)
-	} else {
-		db, err = database.NewPostgresConnection(c.Database.Postgres)
-	}
+	// Initialize database (PostgreSQL only)
+	db, err := database.NewPostgresConnection(c.Database.Postgres)
 	if err != nil {
 		logx.Errorf("Failed to connect to database: %v", err)
 		panic(err)

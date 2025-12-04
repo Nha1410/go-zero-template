@@ -41,28 +41,14 @@ case "$1" in
         echo "Service code generated successfully!"
         ;;
     model)
-        DB_TYPE=${2:-postgres}
-        echo "Generating model code from database: $DB_TYPE..."
+        echo "Generating model code from PostgreSQL database..."
 
-        if [ "$DB_TYPE" = "postgres" ]; then
-            if [ -z "$3" ]; then
-                echo "Error: PostgreSQL connection string required"
-                echo "Usage: ./scripts/generate.sh model postgres 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'"
-                exit 1
-            fi
-            goctl model pg datasource -url "$3" -table "*" -dir service/user/internal/model -cache
-        elif [ "$DB_TYPE" = "mysql" ]; then
-            if [ -z "$3" ]; then
-                echo "Error: MySQL connection string required"
-                echo "Usage: ./scripts/generate.sh model mysql 'user:password@tcp(localhost:3306)/database'"
-                exit 1
-            fi
-            goctl model mysql datasource -url "$3" -table "*" -dir service/user/internal/model -cache
-        else
-            echo "Error: Unsupported database type: $DB_TYPE"
-            echo "Supported types: postgres, mysql"
+        if [ -z "$2" ]; then
+            echo "Error: PostgreSQL connection string required"
+            echo "Usage: ./scripts/generate.sh model 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'"
             exit 1
         fi
+        goctl model pg datasource -url "$2" -table "*" -dir service/user/internal/model -cache
 
         echo "Model code generated successfully!"
         ;;
@@ -72,12 +58,12 @@ case "$1" in
         echo "Commands:"
         echo "  api                    Generate API Gateway code from .api file"
         echo "  service <name>         Generate gRPC service code from .proto file"
-        echo "  model <type> <dsn>    Generate model code from database"
+        echo "  model <dsn>           Generate model code from PostgreSQL database"
         echo ""
         echo "Examples:"
         echo "  $0 api"
         echo "  $0 service user"
-        echo "  $0 model postgres 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'"
+        echo "  $0 model 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'"
         exit 1
         ;;
 esac
