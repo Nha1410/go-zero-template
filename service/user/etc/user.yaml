@@ -17,12 +17,12 @@ Database:
 
   # PostgreSQL configuration
   Postgres:
-    Host: ${DATABASE_HOST:-localhost}
-    Port: 5432  # Use default value directly, env var substitution may cause type mismatch
-    User: ${DATABASE_USER:-postgres}
-    Password: ${DATABASE_PASSWORD:-postgres}
-    Database: ${DATABASE_NAME:-gozero_template}
-    SSLMode: ${DATABASE_SSLMODE:-disable}
+    Host: postgres
+    Port: 5432
+    User: postgres
+    Password: postgres
+    Database: gozero_template
+    SSLMode: disable
     MaxOpenConns: 100
     MaxIdleConns: 10
     ConnMaxLifetime: 3600s
@@ -30,19 +30,19 @@ Database:
 
 # Redis cache configuration (AppRedis to avoid conflict with RpcServerConf.Redis)
 AppRedis:
-  Host: ${REDIS_HOST:-localhost}
-  Port: 6379  # Use default value directly, env var substitution may cause type mismatch
-  Password: ${REDIS_PASSWORD:-}
-  DB: 0  # Use default value directly, env var substitution may cause type mismatch
-  PoolSize: 10  # Use default value directly, env var substitution may cause type mismatch
+  Host: redis
+  Port: 6379
+  Password: ""
+  DB: 0
+  PoolSize: 10
 
 # RabbitMQ message queue configuration
 RabbitMQ:
-  Host: ${RABBITMQ_HOST:-localhost}
-  Port: 5672  # Use default value directly, env var substitution may cause type mismatch
-  User: ${RABBITMQ_USER:-guest}
-  Password: ${RABBITMQ_PASSWORD:-guest}
-  VHost: ${RABBITMQ_VHOST:-/}
+  Host: rabbitmq
+  Port: 5672
+  User: guest
+  Password: guest
+  VHost: /
 
 # Prometheus metrics
 Prometheus:

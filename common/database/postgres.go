@@ -11,16 +11,16 @@ import (
 
 // PostgresConfig holds PostgreSQL configuration
 type PostgresConfig struct {
-	Host            string        `yaml:"Host"`
-	Port            int           `yaml:"Port"`
-	User            string        `yaml:"User"`
-	Password        string        `yaml:"Password"`
-	Database        string        `yaml:"Database"`
-	SSLMode         string        `yaml:"SSLMode"`
-	MaxOpenConns    int           `yaml:"MaxOpenConns"`
-	MaxIdleConns    int           `yaml:"MaxIdleConns"`
-	ConnMaxLifetime time.Duration `yaml:"ConnMaxLifetime"`
-	ConnMaxIdleTime time.Duration `yaml:"ConnMaxIdleTime"`
+	Host            string
+	Port            int
+	User            string
+	Password        string
+	Database        string
+	SSLMode         string
+	MaxOpenConns    int
+	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
+	ConnMaxIdleTime time.Duration
 }
 
 // NewPostgresConnection creates a new PostgreSQL connection
