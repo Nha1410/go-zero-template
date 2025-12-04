@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "./userclient";
+
+// User service definition
+service User {
+  rpc CreateUser (CreateUserReq) returns (CreateUserResp);
+  rpc GetUser (GetUserReq) returns (GetUserResp);
+  rpc GetUsers (GetUsersReq) returns (GetUsersResp);
+  rpc UpdateUser (UpdateUserReq) returns (UpdateUserResp);
+  rpc DeleteUser (DeleteUserReq) returns (DeleteUserResp);
+}
+
+// Request/Response messages
+message CreateUserReq {
+  string email = 1;
+  string name = 2;
+}
+
+message CreateUserResp {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+  string created_at = 4;
+}
+
+message GetUserReq {
+  int64 id = 1;
+}
+
+message GetUserResp {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
+
+message GetUsersReq {
+  int64 page = 1;
+  int64 page_size = 2;
+}
+
+message GetUsersResp {
+  repeated GetUserResp users = 1;
+  int64 total = 2;
+  int64 page = 3;
+  int64 page_size = 4;
+}
+
+message UpdateUserReq {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+}
+
+message UpdateUserResp {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+  string updated_at = 4;
+}
+
+message DeleteUserReq {
+  int64 id = 1;
+}
+
+message DeleteUserResp {
+  bool success = 1;
+}
+
