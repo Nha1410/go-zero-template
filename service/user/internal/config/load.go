@@ -52,9 +52,5 @@ func LoadFromEnv() Config {
 	c.RabbitMQ.Password = envConfig.GetString("RABBITMQ_PASSWORD", "guest")
 	c.RabbitMQ.VHost = envConfig.GetString("RABBITMQ_VHOST", "/")
 
-	c.Prometheus.Host = envConfig.GetString("PROMETHEUS_HOST", "0.0.0.0")
-	c.Prometheus.Port = envConfig.GetInt("PROMETHEUS_PORT", 9092)
-	c.Prometheus.Path = envConfig.GetString("PROMETHEUS_PATH", "/metrics")
-
 	return c
 }

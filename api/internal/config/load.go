@@ -16,11 +16,11 @@ func LoadFromEnv() Config {
 				Name: envConfig.GetString("API_NAME", "api-gateway"),
 				Log: logx.LogConf{
 					ServiceName: envConfig.GetString("API_NAME", "api-gateway"),
-					Mode:         envConfig.GetString("LOG_MODE", "file"),
-					Path:         envConfig.GetString("LOG_PATH", "logs"),
-					Level:        envConfig.GetString("LOG_LEVEL", "info"),
-					Compress:     envConfig.GetBool("LOG_COMPRESS", true),
-					KeepDays:     envConfig.GetInt("LOG_KEEP_DAYS", 7),
+					Mode:        envConfig.GetString("LOG_MODE", "file"),
+					Path:        envConfig.GetString("LOG_PATH", "logs"),
+					Level:       envConfig.GetString("LOG_LEVEL", "info"),
+					Compress:    envConfig.GetBool("LOG_COMPRESS", true),
+					KeepDays:    envConfig.GetInt("LOG_KEEP_DAYS", 7),
 				},
 			},
 			Host: envConfig.GetString("API_HOST", "0.0.0.0"),
@@ -66,10 +66,5 @@ func LoadFromEnv() Config {
 	c.UserRpc.Timeout = int64(envConfig.GetInt("USER_RPC_TIMEOUT", 5000))
 	c.UserRpc.NonBlock = envConfig.GetBool("USER_RPC_NON_BLOCK", true)
 
-	c.Prometheus.Host = envConfig.GetString("PROMETHEUS_HOST", "0.0.0.0")
-	c.Prometheus.Port = envConfig.GetInt("PROMETHEUS_PORT", 9091)
-	c.Prometheus.Path = envConfig.GetString("PROMETHEUS_PATH", "/metrics")
-
 	return c
 }
-

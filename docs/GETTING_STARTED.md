@@ -6,13 +6,11 @@ This guide will help you set up and run the go-zero template project.
 
 Before you begin, ensure you have the following installed:
 
-- **Go 1.21+**: [Download Go](https://golang.org/dl/)
 - **Docker & Docker Compose**: [Install Docker](https://docs.docker.com/get-docker/)
-- **goctl CLI**: Install with `go install github.com/zeromicro/go-zero/tools/goctl@latest`
-- **PostgreSQL**: For database
-- **Redis**: For caching
-- **RabbitMQ**: For message queue
+- **Make**: Usually pre-installed on Unix systems
 - **Zitadel**: OAuth2 provider (or use a test instance)
+
+**Note**: All development tools (Go, goctl, golangci-lint, etc.) are included in the devbox Docker image. PostgreSQL, Redis, and RabbitMQ are provided via Docker Compose.
 
 ## Installation
 
@@ -23,97 +21,62 @@ git clone <your-repo-url>
 cd go-zero-template
 ```
 
-### 2. Install Dependencies
+### 2. Setup Development Environment
+
+Build the devbox Docker image (contains all development tools):
 
 ```bash
-go mod download
+make setup-devbox
 ```
 
-### 3. Install goctl
+This only needs to be done once.
+
+### 3. Install Dependencies
 
 ```bash
-go install github.com/zeromicro/go-zero/tools/goctl@latest
+make mod
 ```
 
-Verify installation:
-```bash
-goctl --version
-```
+This runs `go mod tidy`, `go mod verify`, and `go mod download` in the devbox container.
 
 ## Configuration
 
 ### 1. Database Setup
 
-#### Option A: Using Docker Compose (Recommended for Development)
+Start infrastructure services with Docker Compose:
 
 ```bash
-cd deployments
-docker-compose up -d postgres redis rabbitmq
+make docker-up
 ```
 
 This will start:
 - PostgreSQL on port 5432
 - Redis on port 6379
 - RabbitMQ on port 5672 (Management UI on 15672)
-
-#### Option B: Local Installation
-
-Install and configure PostgreSQL, Redis, and RabbitMQ locally.
+- User Service (gRPC) on port 9000
+- API Gateway on port 8888
 
 ### 2. Configure Environment Variables
 
-#### For Local Development (without Docker)
-
-Copy the example environment file:
+Copy the example environment file in the root directory:
 
 ```bash
-cp env.example .env
+cp .env.example .env
 ```
 
-Edit `.env` with your actual values for database, Redis, RabbitMQ, and Zitadel.
-
-#### For Docker Compose
-
-Copy the example environment file in deployments directory:
-
-```bash
-cd deployments
-cp env.example .env
-```
-
-Edit `deployments/.env` with your actual values. Docker Compose will automatically load this file.
+Edit `.env` with your actual values for database, Redis, RabbitMQ, and Zitadel. Docker Compose will automatically load this file.
 
 ### 3. Initialize Database
-
-#### Option A: Using Docker Compose
 
 The database will be automatically initialized when you start the containers:
 
 ```bash
-cd deployments
-docker-compose up -d postgres
+make docker-up
 ```
 
-The initialization script (`init.sql`) will run automatically on first start.
-
-#### Option B: Manual Setup
-
-Connect to PostgreSQL and create the database:
-
-```bash
-psql -U postgres -h localhost
-CREATE DATABASE gozero_template;
-```
-
-Run the initialization script:
-
-```bash
-psql -U postgres -h localhost -d gozero_template -f deployments/init.sql
-```
+The initialization script (`deployments/init.sql`) will run automatically on first start.
 
 ### 4. Configure Services
-
-#### Environment Variables
 
 This project uses `.env` files for configuration. All configuration is loaded from environment variables.
 
@@ -125,18 +88,16 @@ cp .env.example .env
 
 2. Edit `.env` with your actual values (database, Redis, RabbitMQ, Zitadel credentials)
 
-3. Services will automatically load from `.env` file when running locally
-
-**For Docker:**
-- Environment variables are set in `docker-compose.yml`
-- You can also use `.env` file which will be loaded automatically
+3. Docker Compose will automatically load the `.env` file from the root directory
 
 ## Code Generation
+
+All code generation commands run in the devbox Docker container via Makefile.
 
 ### Generate API Gateway Code
 
 ```bash
-goctl api go -api api/api/api.api -dir api --style gozero
+make generate-api
 ```
 
 This will generate:
@@ -147,11 +108,7 @@ This will generate:
 ### Generate User Service Code
 
 ```bash
-goctl rpc protoc service/user/user.proto \
-    --go_out=service/user \
-    --go-grpc_out=service/user \
-    --zrpc_out=service/user \
-    --style gozero
+make generate-service SERVICE=user
 ```
 
 This will generate:
@@ -159,59 +116,47 @@ This will generate:
 - Client stubs
 - Service registration code
 
-### Generate Models from Database
+### Other Development Commands
 
 ```bash
-goctl model pg datasource \
-    -url "host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable" \
-    -table "*" \
-    -dir service/user/internal/model \
-    -cache
+make fmt              # Format code
+make lint             # Run linter
+make mod              # Update dependencies
+make update           # Update all dependencies
 ```
 
 See [CODE_GENERATION.md](CODE_GENERATION.md) for detailed code generation guide.
 
 ## Running the Services
 
-### Development Mode
+All services run in Docker containers. Start all services:
 
-#### 1. Start Infrastructure
+```bash
+make docker-up
+```
 
+This will start:
+- PostgreSQL database
+- Redis cache
+- RabbitMQ message queue
+- User Service (gRPC) on port 9000
+- API Gateway on port 8888
+
+**View Logs:**
+```bash
+make docker-logs
+```
+
+**Stop Services:**
+```bash
+make docker-down
+```
+
+**Rebuild and Restart:**
 ```bash
 cd deployments
-docker-compose up -d postgres redis rabbitmq
+docker-compose up -d --build
 ```
-
-#### 2. Run User Service
-
-```bash
-cd service/user
-go run main.go
-```
-
-The service will start on `localhost:9000`.
-
-#### 3. Run API Gateway
-
-In another terminal:
-
-```bash
-cd api
-go run main.go
-```
-
-The API Gateway will start on `localhost:8888`.
-
-### Using Docker Compose
-
-Run everything with Docker Compose:
-
-```bash
-cd deployments
-docker-compose up --build
-```
-
-This will build and start all services.
 
 ## Testing the API
 
@@ -258,7 +203,7 @@ curl http://localhost:8888/api/v1/users/1 \
 Edit `api/api/api.api` and regenerate:
 
 ```bash
-goctl api go -api api/api/api.api -dir api --style gozero
+make generate-api
 ```
 
 ### 2. Modify Proto Definition
@@ -266,11 +211,7 @@ goctl api go -api api/api/api.api -dir api --style gozero
 Edit `service/user/user.proto` and regenerate:
 
 ```bash
-goctl rpc protoc service/user/user.proto \
-    --go_out=service/user \
-    --go-grpc_out=service/user \
-    --zrpc_out=service/user \
-    --style gozero
+make generate-service SERVICE=user
 ```
 
 ### 3. Add New Service
@@ -279,14 +220,11 @@ goctl rpc protoc service/user/user.proto \
 2. Create proto file: `service/your-service/your-service.proto`
 3. Generate code:
    ```bash
-   goctl rpc protoc service/your-service/your-service.proto \
-       --go_out=service/your-service \
-       --go-grpc_out=service/your-service \
-       --zrpc_out=service/your-service \
-       --style gozero
+   make generate-service SERVICE=your-service
    ```
 4. Implement clean architecture layers
-5. Add to `deployments/docker-compose.yml`
+5. Create Dockerfile: `docker/your-service/Dockerfile` (copy from `docker/user/Dockerfile` and adjust)
+6. Add to `deployments/docker-compose.yml`
 
 ## Project Structure
 
@@ -317,12 +255,13 @@ go-zero-template/
 ### View Logs
 
 ```bash
-# Docker logs
-docker-compose -f deployments/docker-compose.yml logs -f
+# All services
+make docker-logs
 
-# Service logs
-tail -f service/user/logs/*.log
-tail -f api/logs/*.log
+# Specific service
+cd deployments
+docker-compose logs -f api-gateway
+docker-compose logs -f user-service
 ```
 
 ### Database Migrations
@@ -333,20 +272,19 @@ The template includes a migration script placeholder. You can integrate with:
 
 ### Debugging
 
-1. **Enable debug logging**: Set log level to `debug` in config files
-2. **Use gRPC reflection**: Enable in service config (`Mode: dev`)
-3. **Use grpcurl**: Test gRPC services directly
+1. **Enable debug logging**: Set `LOG_LEVEL=debug` in `.env` file
+2. **Use gRPC reflection**: Already enabled in dev mode
+3. **Use grpcurl**: Test gRPC services directly (install locally or use devbox)
 
 ```bash
-# Install grpcurl
-go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
-
-# List services
+# List services (from host)
 grpcurl -plaintext localhost:9000 list
 
 # Call service
 grpcurl -plaintext localhost:9000 user.User/GetUser
 ```
+
+**Note**: grpcurl can be installed locally or you can run it in the devbox container.
 
 ## Troubleshooting
 
@@ -359,8 +297,9 @@ If you get port conflicts:
 ### Database Connection Failed
 
 - Check database is running: `docker ps`
-- Verify credentials in config files
-- Check network connectivity
+- Verify credentials in `.env` file
+- Check network connectivity: `docker network ls`
+- View database logs: `cd deployments && docker-compose logs postgres`
 
 ### gRPC Connection Failed
 

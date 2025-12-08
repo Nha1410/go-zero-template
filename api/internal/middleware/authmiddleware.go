@@ -11,6 +11,14 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
+type contextKey string
+
+const (
+	userIDKey    contextKey = "user_id"
+	userEmailKey contextKey = "user_email"
+	userInfoKey  contextKey = "user_info"
+)
+
 type AuthMiddleware struct {
 	svcCtx *svc.ServiceContext
 }
@@ -36,24 +44,23 @@ func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user_id", userInfo.Sub)
-		ctx = context.WithValue(ctx, "user_email", userInfo.Email)
-		ctx = context.WithValue(ctx, "user_info", userInfo)
+		ctx := context.WithValue(r.Context(), userIDKey, userInfo.Sub)
+		ctx = context.WithValue(ctx, userEmailKey, userInfo.Email)
+		ctx = context.WithValue(ctx, userInfoKey, userInfo)
 
 		next(w, r.WithContext(ctx))
 	}
 }
 
-// OptionalAuthMiddleware allows requests with or without authentication
 func (m *AuthMiddleware) OptionalAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := auth.ExtractTokenFromRequest(r)
 		if token != "" {
 			userInfo, err := m.svcCtx.Zitadel.ValidateToken(r.Context(), token)
 			if err == nil {
-				ctx := context.WithValue(r.Context(), "user_id", userInfo.Sub)
-				ctx = context.WithValue(ctx, "user_email", userInfo.Email)
-				ctx = context.WithValue(ctx, "user_info", userInfo)
+				ctx := context.WithValue(r.Context(), userIDKey, userInfo.Sub)
+				ctx = context.WithValue(ctx, userEmailKey, userInfo.Email)
+				ctx = context.WithValue(ctx, userInfoKey, userInfo)
 				r = r.WithContext(ctx)
 			}
 		}

@@ -46,6 +46,10 @@ go-zero-template/
 │   ├── logger/             # Logging utilities
 │   ├── errors/             # Error handling
 │   └── validator/          # Request validation
+├── docker/                 # Docker configurations
+│   ├── devbox/            # Development container (goctl, lint, etc.)
+│   ├── api/               # API Gateway Dockerfile
+│   └── user/              # User service Dockerfile
 ├── deployments/            # Deployment configs
 │   └── docker-compose.yml   # Docker Compose cho local dev
 └── docs/                   # Documentation
@@ -53,52 +57,59 @@ go-zero-template/
 
 ## Prerequisites
 
-- Go 1.21 or higher
 - Docker and Docker Compose
-- goctl CLI tool
-- PostgreSQL
-- Redis
-- RabbitMQ
+- Make
 - Zitadel instance (for OAuth2)
+
+**Note**:
+- All development tools (goctl, golangci-lint, etc.) are included in the devbox Docker image
+- PostgreSQL, Redis, and RabbitMQ are provided via Docker Compose
+- You don't need to install Go, goctl, or any other tools locally
 
 ## Quick Start
 
-### 1. Install goctl
+### 1. Setup Development Environment
+
+Build the devbox Docker image (contains goctl, golangci-lint, and other dev tools):
 
 ```bash
-go install github.com/zeromicro/go-zero/tools/goctl@latest
+make setup-devbox
 ```
+
+This only needs to be done once. The devbox image will be used for all development commands.
 
 ### 2. Clone and Setup
 
 ```bash
 git clone <your-repo-url>
 cd go-zero-template
-go mod download
+
+# Download dependencies (runs in devbox)
+make mod
 ```
 
 ### 3. Configure Environment
 
 **This project uses `.env` files for configuration. YAML files are no longer needed.**
 
-Copy the example environment file and update with your values:
+Copy the example environment file in the root directory:
 
 ```bash
-# For local development (outside Docker)
 cp .env.example .env
-# Edit .env with your actual values
-
-# For Docker Compose
-cd deployments
-cp env.example .env
 # Edit .env with your actual values
 ```
 
 Update the configuration in `.env` with your database, Redis, RabbitMQ, and Zitadel credentials.
 
-**Note**: All configuration is loaded from environment variables. See `.env.example` for all available configuration options.
+**Note**: All configuration is loaded from environment variables. The `.env` file in the root directory will be automatically loaded by Docker Compose. See `.env.example` for all available configuration options.
 
-### 4. Start All Services with Docker Compose (Recommended)
+### 4. Start All Services
+
+```bash
+make docker-up
+```
+
+Or directly:
 
 ```bash
 cd deployments
@@ -118,35 +129,13 @@ See [deployments/README.md](deployments/README.md) for detailed Docker deploymen
 
 ```bash
 # Generate API Gateway code
-goctl api go -api api/api/api.api -dir api --style gozero
+make generate-api
 
 # Generate User service code
-goctl rpc protoc service/user/user.proto \
-    --go_out=service/user \
-    --go-grpc_out=service/user \
-    --zrpc_out=service/user \
-    --style gozero
+make generate-service SERVICE=user
 ```
 
 See [docs/CODE_GENERATION.md](docs/CODE_GENERATION.md) for detailed code generation guide.
-
-### 6. Run Services Locally (Alternative to Docker)
-
-If you prefer to run services locally instead of Docker:
-
-```bash
-# Make sure you have .env file in root directory
-cp .env.example .env
-# Edit .env with your values
-
-# Run User service
-cd service/user
-go run main.go
-
-# Run API Gateway (in another terminal)
-cd api
-go run main.go
-```
 
 ## Development
 
@@ -156,37 +145,37 @@ go run main.go
 2. Create proto file: `service/your-service/your-service.proto`
 3. Generate code:
    ```bash
-   goctl rpc protoc service/your-service/your-service.proto \
-       --go_out=service/your-service \
-       --go-grpc_out=service/your-service \
-       --zrpc_out=service/your-service \
-       --style gozero
+   make generate-service SERVICE=your-service
    ```
 4. Implement clean architecture layers
 5. Add service to docker-compose.yml
+6. Create Dockerfile in `docker/your-service/Dockerfile` (copy from `docker/user/Dockerfile` and adjust)
 
 ### Code Generation
 
-Generate code using `goctl` CLI tool:
+Generate code using Makefile commands (runs in devbox container):
 
 ```bash
 # Generate API Gateway from .api file
-goctl api go -api api/api/api.api -dir api --style gozero
+make generate-api
 
 # Generate gRPC service from .proto file
-goctl rpc protoc service/<service-name>/<service-name>.proto \
-    --go_out=service/<service-name> \
-    --go-grpc_out=service/<service-name> \
-    --zrpc_out=service/<service-name> \
-    --style gozero
+make generate-service SERVICE=<service-name>
 
-# Generate models from PostgreSQL database
-goctl model pg datasource \
-    -url "host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable" \
-    -table "*" \
-    -dir service/user/internal/model \
-    -cache
+# Format code
+make fmt
+
+# Run linter
+make lint
+
+# Update dependencies
+make update
+
+# Run go mod tidy
+make mod
 ```
+
+All development commands run in the devbox Docker container, ensuring consistent environment across all developers.
 
 See [docs/CODE_GENERATION.md](docs/CODE_GENERATION.md) for detailed guide.
 
@@ -209,19 +198,29 @@ All configuration is done via environment variables. See `.env.example` for all 
 
 **Setup:**
 ```bash
-# For local development
 cp .env.example .env
 # Edit .env with your values
 ```
 
+The `.env` file in the root directory will be automatically loaded by Docker Compose.
+
 ## Docker
 
-See [deployments/README.md](deployments/README.md) for detailed Docker deployment guide.
+All services run in Docker containers. See [deployments/README.md](deployments/README.md) for detailed Docker deployment guide.
 
 **Quick Start:**
 ```bash
-cd deployments
-docker-compose up -d
+make docker-up
+```
+
+**View Logs:**
+```bash
+make docker-logs
+```
+
+**Stop Services:**
+```bash
+make docker-down
 ```
 
 ## Authentication

@@ -1,20 +1,40 @@
-.PHONY: help install generate build run test clean docker-up docker-down
+MAKEFILE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+DEVBOX := go-zero-template/devbox
+INDEVBOX := docker run --network host --rm -i -v $(MAKEFILE_DIR):/go/src $(DEVBOX)
+
+.PHONY: help setup-devbox mod update lint generate build run test clean docker-up docker-down docker-logs fmt tidy
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
 	@echo 'Available targets:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: ## Install dependencies
-	go mod download
-	go install github.com/zeromicro/go-zero/tools/goctl@latest
+setup-devbox: ## Build devbox Docker image for development commands
+	docker build --no-cache -t $(DEVBOX) -f $(MAKEFILE_DIR)/docker/devbox/Dockerfile $(MAKEFILE_DIR)
+
+mod: ## Run go mod tidy, verify and download
+	$(INDEVBOX) go mod tidy
+	$(INDEVBOX) go mod verify
+	$(INDEVBOX) go mod download
+
+update: ## Update all Go dependencies
+	$(INDEVBOX) go get -u ./...
+
+lint: ## Run golangci-lint
+	$(INDEVBOX) golangci-lint run
+
+fmt: ## Format Go code
+	$(INDEVBOX) gofmt -s -w .
+
+tidy: ## Run go mod tidy
+	$(INDEVBOX) go mod tidy
 
 generate-api: ## Generate API Gateway code
-	goctl api go -api api/api/api.api -dir api --style gozero
+	$(INDEVBOX) goctl api go -api api/api/api.api -dir api --style gozero
 
 generate-service: ## Generate service code (usage: make generate-service SERVICE=user)
-	goctl rpc protoc service/$(SERVICE)/$(SERVICE).proto \
+	$(INDEVBOX) goctl rpc protoc service/$(SERVICE)/$(SERVICE).proto \
 		--go_out=service/$(SERVICE) \
 		--go-grpc_out=service/$(SERVICE) \
 		--zrpc_out=service/$(SERVICE) \
@@ -23,18 +43,26 @@ generate-service: ## Generate service code (usage: make generate-service SERVICE
 generate: generate-api generate-service ## Generate all code
 
 build-api: ## Build API Gateway
-	cd api && go build -o ../bin/api main.go
+	$(INDEVBOX) go build -o bin/api ./api/main.go
 
 build-user: ## Build User service
-	cd service/user && go build -o ../../bin/user main.go
+	$(INDEVBOX) go build -o bin/user ./service/user/main.go
 
 build: build-api build-user ## Build all services
 
-run-api: ## Run API Gateway
+run-api: ## Run API Gateway locally
 	cd api && go run main.go
 
-run-user: ## Run User service
+run-user: ## Run User service locally
 	cd service/user && go run main.go
+
+test: ## Run tests
+	$(INDEVBOX) go test ./...
+
+clean: ## Clean build artifacts
+	rm -rf bin/
+	rm -rf api/logs/
+	rm -rf service/*/logs/
 
 docker-up: ## Start Docker Compose services
 	cd deployments && docker-compose up -d
@@ -44,12 +72,4 @@ docker-down: ## Stop Docker Compose services
 
 docker-logs: ## View Docker Compose logs
 	cd deployments && docker-compose logs -f
-
-test: ## Run tests
-	go test ./...
-
-clean: ## Clean build artifacts
-	rm -rf bin/
-	rm -rf api/logs/
-	rm -rf service/*/logs/
 

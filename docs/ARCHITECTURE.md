@@ -244,7 +244,6 @@ msgs, _ := rabbitmq.Consume("user.created", "consumer", false, false, false, fal
 
 ### Metrics
 
-- Prometheus metrics endpoint
 - Custom business metrics
 - System metrics (CPU, memory, etc.)
 

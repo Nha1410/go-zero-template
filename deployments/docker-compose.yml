@@ -65,7 +65,7 @@ services:
   user-service:
     build:
       context: ..
-      dockerfile: service/user/Dockerfile
+      dockerfile: docker/user/Dockerfile
     container_name: go-zero-user-service
     depends_on:
       postgres:
@@ -111,16 +111,11 @@ services:
       - LOG_LEVEL=info
       - LOG_COMPRESS=true
       - LOG_KEEP_DAYS=7
-      # Prometheus
-      - PROMETHEUS_HOST=0.0.0.0
-      - PROMETHEUS_PORT=9092
-      - PROMETHEUS_PATH=/metrics
-
   # API Gateway
   api-gateway:
     build:
       context: ..
-      dockerfile: api/Dockerfile
+      dockerfile: docker/api/Dockerfile
     container_name: go-zero-api-gateway
     depends_on:
       user-service:
@@ -171,10 +166,6 @@ services:
       - LOG_LEVEL=info
       - LOG_COMPRESS=true
       - LOG_KEEP_DAYS=7
-      # Prometheus
-      - PROMETHEUS_HOST=0.0.0.0
-      - PROMETHEUS_PORT=9091
-      - PROMETHEUS_PATH=/metrics
       # Zitadel (optional, can be set in .env)
       - ZITADEL_ISSUER=${ZITADEL_ISSUER:-}
       - ZITADEL_CLIENT_ID=${ZITADEL_CLIENT_ID:-}

@@ -5,19 +5,30 @@ This guide explains how to run the go-zero template services using Docker Compos
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- `.env` file in the root directory (optional, can use env vars directly)
+- `.env` file in the root directory (required)
+
+## Docker Structure
+
+All Dockerfiles are located in the `docker/` directory:
+- `docker/devbox/` - Development container with tools (goctl, lint, etc.)
+- `docker/api/` - API Gateway Dockerfile
+- `docker/user/` - User service Dockerfile
+
+Service Dockerfiles are minimal and optimized for production (no dev tools).
 
 ## Quick Start
 
-### 1. Setup Environment (Optional)
+### 1. Setup Environment
 
-If you want to use a `.env` file, create one in the root directory:
+Create `.env` file in the root directory:
 
 ```bash
 cd ..
 cp .env.example .env
 # Edit .env with your values
 ```
+
+The `.env` file in the root directory will be automatically loaded by Docker Compose.
 
 ### 2. Start All Services
 
@@ -64,14 +75,13 @@ docker-compose up -d --build
 
 ## Configuration
 
-All services are configured via environment variables. You can:
+All services are configured via environment variables from the `.env` file in the root directory.
 
-1. **Use .env file**: Create `.env` in root directory and docker-compose will load it
-2. **Set directly in docker-compose.yml**: Environment variables are already defined
-3. **Override via command line**:
-   ```bash
-   DATABASE_PASSWORD=mypassword docker-compose up -d
-   ```
+The `.env` file is automatically loaded by Docker Compose. You can also override specific variables via command line:
+
+```bash
+DATABASE_PASSWORD=mypassword docker-compose up -d
+```
 
 ## Service Endpoints
 
