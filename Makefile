@@ -2,7 +2,10 @@ MAKEFILE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 DEVBOX := go-zero-template/devbox
 INDEVBOX := docker run --network host --rm -i -v $(MAKEFILE_DIR):/go/src $(DEVBOX)
 
-.PHONY: help setup-devbox mod update lint generate build run test clean docker-up docker-down docker-logs fmt tidy
+INAPI := docker compose -f deployments/docker-compose.yml exec api-gateway
+INUSER := docker compose -f deployments/docker-compose.yml exec user-service
+
+.PHONY: help setup-devbox vet fmt imports mod update lint generate build run test clean docker-up docker-down docker-logs
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -13,22 +16,25 @@ help: ## Show this help message
 setup-devbox: ## Build devbox Docker image for development commands
 	docker build --no-cache -t $(DEVBOX) -f $(MAKEFILE_DIR)/docker/devbox/Dockerfile $(MAKEFILE_DIR)
 
+vet: ## Run go vet
+	$(INAPI) go vet ./...
+
+fmt: ## Format Go code
+	$(INAPI) gofmt -d -s ./...
+
+imports: ## Format imports
+	$(INAPI) goimports -w ./...
+
 mod: ## Run go mod tidy, verify and download
-	$(INDEVBOX) go mod tidy
-	$(INDEVBOX) go mod verify
-	$(INDEVBOX) go mod download
+	$(INAPI) go mod tidy
+	$(INAPI) go mod verify
+	$(INAPI) go mod download
 
 update: ## Update all Go dependencies
 	$(INDEVBOX) go get -u ./...
 
 lint: ## Run golangci-lint
-	$(INDEVBOX) golangci-lint run
-
-fmt: ## Format Go code
-	$(INDEVBOX) gofmt -s -w .
-
-tidy: ## Run go mod tidy
-	$(INDEVBOX) go mod tidy
+	$(INAPI) golangci-lint run
 
 generate-api: ## Generate API Gateway code
 	$(INDEVBOX) goctl api go -api api/api/api.api -dir api --style gozero
@@ -43,10 +49,10 @@ generate-service: ## Generate service code (usage: make generate-service SERVICE
 generate: generate-api generate-service ## Generate all code
 
 build-api: ## Build API Gateway
-	$(INDEVBOX) go build -o bin/api ./api/main.go
+	$(INAPI) go build -o bin/api ./api/main.go
 
 build-user: ## Build User service
-	$(INDEVBOX) go build -o bin/user ./service/user/main.go
+	$(INUSER) go build -o bin/user ./service/user/main.go
 
 build: build-api build-user ## Build all services
 
@@ -57,7 +63,7 @@ run-user: ## Run User service locally
 	cd service/user && go run main.go
 
 test: ## Run tests
-	$(INDEVBOX) go test ./...
+	$(INAPI) go test ./...
 
 clean: ## Clean build artifacts
 	rm -rf bin/

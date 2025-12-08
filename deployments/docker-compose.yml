@@ -76,6 +76,9 @@ services:
         condition: service_healthy
     ports:
       - "9000:9000"
+    volumes:
+      - ../:/app
+    working_dir: /app
     networks:
       - go-zero-network
     env_file:
@@ -126,6 +129,9 @@ services:
         condition: service_healthy
     ports:
       - "8888:8888"
+    volumes:
+      - ../:/app
+    working_dir: /app
     networks:
       - go-zero-network
     env_file:

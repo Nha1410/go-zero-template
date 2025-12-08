@@ -17,13 +17,25 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/api ./api/main.go
 
 # Final stage
-FROM alpine:latest
+FROM golang:1.24-alpine
 
-RUN apk --no-cache add ca-certificates tzdata
-WORKDIR /root/
+RUN apk --no-cache add ca-certificates tzdata git
+
+# Install goimports
+RUN go install golang.org/x/tools/cmd/goimports@latest
+
+# Install golangci-lint
+RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+WORKDIR /app
 
 # Copy the binary from builder
 COPY --from=builder /app/bin/api ./api
+
+# Copy source code for development commands
+COPY --from=builder /app/go.mod /app/go.sum ./
+COPY --from=builder /app/api ./api
+COPY --from=builder /app/common ./common
 
 EXPOSE 8888
 
