@@ -11,7 +11,7 @@ A production-ready template repository for building microservices APIs using [go
 - ⚡ **Redis Caching** - Built-in Redis client for caching
 - 📨 **RabbitMQ** - Message queue support for async processing
 - 🐳 **Docker Support** - Docker Compose setup for local development
-- 🛠️ **goctl Integration** - Helper scripts for code generation
+- 🛠️ **goctl Integration** - Code generation using goctl CLI
 - 📝 **Comprehensive Documentation** - Architecture and getting started guides
 
 ## Project Structure
@@ -46,9 +46,6 @@ go-zero-template/
 │   ├── logger/             # Logging utilities
 │   ├── errors/             # Error handling
 │   └── validator/          # Request validation
-├── scripts/                # Helper scripts
-│   ├── generate.sh         # Script generate code với goctl
-│   └── migrate.sh          # Database migration script
 ├── deployments/            # Deployment configs
 │   └── docker-compose.yml   # Docker Compose cho local dev
 └── docs/                   # Documentation
@@ -121,11 +118,17 @@ See [deployments/README.md](deployments/README.md) for detailed Docker deploymen
 
 ```bash
 # Generate API Gateway code
-./scripts/generate-api.sh
+goctl api go -api api/api/api.api -dir api --style gozero
 
 # Generate User service code
-./scripts/generate-service.sh user
+goctl rpc protoc service/user/user.proto \
+    --go_out=service/user \
+    --go-grpc_out=service/user \
+    --zrpc_out=service/user \
+    --style gozero
 ```
+
+See [docs/CODE_GENERATION.md](docs/CODE_GENERATION.md) for detailed code generation guide.
 
 ### 6. Run Services Locally (Alternative to Docker)
 
@@ -151,24 +154,41 @@ go run main.go
 
 1. Create service directory: `service/your-service/`
 2. Create proto file: `service/your-service/your-service.proto`
-3. Generate code: `./scripts/generate-service.sh your-service`
+3. Generate code:
+   ```bash
+   goctl rpc protoc service/your-service/your-service.proto \
+       --go_out=service/your-service \
+       --go-grpc_out=service/your-service \
+       --zrpc_out=service/your-service \
+       --style gozero
+   ```
 4. Implement clean architecture layers
 5. Add service to docker-compose.yml
 
 ### Code Generation
 
-The template includes helper scripts for code generation:
+Generate code using `goctl` CLI tool:
 
 ```bash
 # Generate API Gateway from .api file
-./scripts/generate-api.sh
+goctl api go -api api/api/api.api -dir api --style gozero
 
 # Generate gRPC service from .proto file
-./scripts/generate-service.sh <service-name>
+goctl rpc protoc service/<service-name>/<service-name>.proto \
+    --go_out=service/<service-name> \
+    --go-grpc_out=service/<service-name> \
+    --zrpc_out=service/<service-name> \
+    --style gozero
 
 # Generate models from PostgreSQL database
-./scripts/generate.sh model 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'
+goctl model pg datasource \
+    -url "host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable" \
+    -table "*" \
+    -dir service/user/internal/model \
+    -cache
 ```
+
+See [docs/CODE_GENERATION.md](docs/CODE_GENERATION.md) for detailed guide.
 
 ## Architecture
 
@@ -217,6 +237,7 @@ Authorization: Bearer <your-token>
 
 - [Architecture Documentation](docs/ARCHITECTURE.md)
 - [Getting Started Guide](docs/GETTING_STARTED.md)
+- [Code Generation Guide](docs/CODE_GENERATION.md)
 
 ## Contributing
 

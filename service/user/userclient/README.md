@@ -11,12 +11,6 @@ Currently, this directory contains a **placeholder file** (`userclient.go`) that
 To generate the real client code from the proto file, run:
 
 ```bash
-./scripts/generate-service.sh user
-```
-
-Or manually:
-
-```bash
 goctl rpc protoc service/user/user.proto \
   --go_out=service/user \
   --go-grpc_out=service/user \

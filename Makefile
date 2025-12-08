@@ -11,10 +11,14 @@ install: ## Install dependencies
 	go install github.com/zeromicro/go-zero/tools/goctl@latest
 
 generate-api: ## Generate API Gateway code
-	./scripts/generate-api.sh
+	goctl api go -api api/api/api.api -dir api --style gozero
 
 generate-service: ## Generate service code (usage: make generate-service SERVICE=user)
-	./scripts/generate-service.sh $(SERVICE)
+	goctl rpc protoc service/$(SERVICE)/$(SERVICE).proto \
+		--go_out=service/$(SERVICE) \
+		--go-grpc_out=service/$(SERVICE) \
+		--zrpc_out=service/$(SERVICE) \
+		--style gozero
 
 generate: generate-api generate-service ## Generate all code
 

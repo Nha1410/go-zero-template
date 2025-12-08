@@ -136,7 +136,7 @@ cp .env.example .env
 ### Generate API Gateway Code
 
 ```bash
-./scripts/generate-api.sh
+goctl api go -api api/api/api.api -dir api --style gozero
 ```
 
 This will generate:
@@ -147,7 +147,11 @@ This will generate:
 ### Generate User Service Code
 
 ```bash
-./scripts/generate-service.sh user
+goctl rpc protoc service/user/user.proto \
+    --go_out=service/user \
+    --go-grpc_out=service/user \
+    --zrpc_out=service/user \
+    --style gozero
 ```
 
 This will generate:
@@ -158,12 +162,14 @@ This will generate:
 ### Generate Models from Database
 
 ```bash
-# PostgreSQL
-./scripts/generate.sh model postgres 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'
-
-# PostgreSQL only
-./scripts/generate.sh model 'host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable'
+goctl model pg datasource \
+    -url "host=localhost port=5432 user=postgres password=postgres dbname=gozero_template sslmode=disable" \
+    -table "*" \
+    -dir service/user/internal/model \
+    -cache
 ```
+
+See [CODE_GENERATION.md](CODE_GENERATION.md) for detailed code generation guide.
 
 ## Running the Services
 
@@ -252,7 +258,7 @@ curl http://localhost:8888/api/v1/users/1 \
 Edit `api/api/api.api` and regenerate:
 
 ```bash
-./scripts/generate-api.sh
+goctl api go -api api/api/api.api -dir api --style gozero
 ```
 
 ### 2. Modify Proto Definition
@@ -260,14 +266,25 @@ Edit `api/api/api.api` and regenerate:
 Edit `service/user/user.proto` and regenerate:
 
 ```bash
-./scripts/generate-service.sh user
+goctl rpc protoc service/user/user.proto \
+    --go_out=service/user \
+    --go-grpc_out=service/user \
+    --zrpc_out=service/user \
+    --style gozero
 ```
 
 ### 3. Add New Service
 
 1. Create service directory: `service/your-service/`
 2. Create proto file: `service/your-service/your-service.proto`
-3. Generate code: `./scripts/generate-service.sh your-service`
+3. Generate code:
+   ```bash
+   goctl rpc protoc service/your-service/your-service.proto \
+       --go_out=service/your-service \
+       --go-grpc_out=service/your-service \
+       --zrpc_out=service/your-service \
+       --style gozero
+   ```
 4. Implement clean architecture layers
 5. Add to `deployments/docker-compose.yml`
 
@@ -292,7 +309,6 @@ go-zero-template/
 │       │   └── handler/    # gRPC handlers
 │       └── etc/            # Configuration
 ├── common/                 # Shared packages
-├── scripts/                # Helper scripts
 └── deployments/            # Docker configs
 ```
 
